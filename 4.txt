@@ -1,0 +1,243 @@
+package nmit.mohan.com.camerasdcard;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;a
+import android.widget.ImageView;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+public class MainActivity extends AppCompatActivity {
+final Integer CAMERA_REQUEST=1;
+ImageView imageView;
+Button take,view;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+imageView= (ImageView) findViewById(R.id.iv);
+take= (Button) findViewById(R.id.takePic);
+view= (Button) findViewById(R.id.viewPic);
+take.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View v) {
+Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+String PictureName=getPictureName();
+File imageFile=new File (pictureDirectory,PictureName);
+Uri pictureUri=Uri.fromFile(imageFile);
+intent.putExtra(MediaStore.EXTRA_OUTPUT,pictureUri);
+startActivityForResult(intent,CAMERA_REQUEST);
+}
+});
+view.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View v) {
+Intent i=new Intent(MainActivity.this,Second.class);
+startActivity(i);
+}
+});
+}
+private String getPictureName() {
+SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd_HHmmss");
+String timestamp=sdf.format(new Date());
+return "IMG"+timestamp+".jpg";}
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+super.onActivityResult(requestCode, resultCode, data);
+if(resultCode==RESULT_OK){
+if(requestCode==CAMERA_REQUEST){
+//
+Bitmap img=(Bitmap) data.getExtras().get("data");
+//
+imageView.setImageBitmap(img);
+}
+}
+}
+}
+ImageModel .java
+package nmit.mohan.com.camerasdcard;
+import android.net.Uri;
+public class ImageModel {
+private String name;
+private Uri uri;
+public String getName() {
+return name;
+}
+public void setName(String name) {
+this.name = name;
+}
+public Uri getUri() {
+return uri;
+}
+public void setUri(Uri uri) {
+this.uri = uri;
+}
+}
+MainActivity.java
+package nmit.mohan.com.camerasdcard;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;a
+import android.widget.ImageView;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+public class MainActivity extends AppCompatActivity {
+final Integer CAMERA_REQUEST=1;
+ImageView imageView;
+Button take,view;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);imageView= (ImageView) findViewById(R.id.iv);
+take= (Button) findViewById(R.id.takePic);
+view= (Button) findViewById(R.id.viewPic);
+take.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View v) {
+Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+File pictureDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+String PictureName=getPictureName();
+File imageFile=new File (pictureDirectory,PictureName);
+Uri pictureUri=Uri.fromFile(imageFile);
+intent.putExtra(MediaStore.EXTRA_OUTPUT,pictureUri);
+startActivityForResult(intent,CAMERA_REQUEST);
+}
+});
+view.setOnClickListener(new View.OnClickListener() {
+@Override
+public void onClick(View v) {
+Intent i=new Intent(MainActivity.this,Second.class);
+startActivity(i);
+}
+});
+}
+private String getPictureName() {
+SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd_HHmmss");
+String timestamp=sdf.format(new Date());
+return "IMG"+timestamp+".jpg";
+}
+@Override
+protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+super.onActivityResult(requestCode, resultCode, data);
+if(resultCode==RESULT_OK){
+if(requestCode==CAMERA_REQUEST){
+//
+Bitmap img=(Bitmap) data.getExtras().get("data");
+//
+imageView.setImageBitmap(img);
+}
+}
+}
+}
+Second Activity.java
+package nmit.mohan.com.camerasdcard;
+import android.net.Uri;
+import android.os.Environment;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.GridView;
+import java.io.File;
+import java.util.ArrayList;
+public class Second extends AppCompatActivity {
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_second);
+final GridView gv= (GridView) findViewById(R.id.gv);
+gv.setAdapter(new CustomAdapter(Second.this,getData()));
+}
+private ArrayList<ImageModel> getData(){ArrayList<ImageModel> imgModel=new ArrayList<>();
+File DownloadFolder= Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES);
+ImageModel im;
+if(DownloadFolder.exists()){
+File []files=DownloadFolder.listFiles();
+for (int i = 0; i < files.length; i++) {
+File file=files[i];
+im=new ImageModel();
+im.setName(file.getName());
+im.setUri(Uri.fromFile(file));
+imgModel.add(im);
+}
+}
+return imgModel;
+}
+}
+activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:orientation="vertical"
+android:layout_height="match_parent"
+tools:context="nmit.mohan.com.camerasdcard.MainActivity">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Hello World!"
+app:layout_constraintBottom_toBottomOf="parent"
+app:layout_constraintLeft_toLeftOf="parent"
+app:layout_constraintRight_toRightOf="parent"
+app:layout_constraintTop_toTopOf="parent" />
+<ImageView
+android:layout_width="match_parent"
+android:layout_height="451dp"
+android:id="@+id/iv"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/takePic"
+android:text="Take Pic"
+/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/viewPic"
+android:text="Gallery"
+/>
+</LinearLayout>
+activity_second.xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context="nmit.mohan.com.camerasdcard.Second"><GridView
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:numColumns="2"
+android:id="@+id/gv">
+</GridView>
+</RelativeLayout>
+Itemlayout.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:orientation="vertical" android:layout_width="wrap_content"
+android:layout_height="wrap_content">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/itemtv"
+android:text="some text"
+/>
+<ImageView
+android:id="@+id/itemiv"
+android:layout_width="135dp"
+android:layout_height="160dp"
+app:srcCompat="@drawable/cameraicon" />
+</LinearLayout>
